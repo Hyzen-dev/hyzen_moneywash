@@ -2,7 +2,7 @@
 Lang = {}
 Config = {}
 
-Config.Lang = 'fr' -- 'fr' or 'en'
+Config.Lang = 'en' -- 'fr' or 'en'
 Config.Framework = 'qbcore' -- 'qbcore' or 'esx'
 Config.UseTarget = GetConvar('UseTarget', 'false') == 'true' -- If you don't have Convar in server.cfg, add it
 

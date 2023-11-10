@@ -94,6 +94,9 @@ RegisterNetEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition', functio
 
                     Citizen.CreateThread(function()
                         while not hasPositionChanged do
+                            if not DoesEntityExist(playerPed) then
+                                return
+                            end
                             coords = Framework.Functions.GetCoords(playerPed)
                             playerCoords = vector3(coords.x, coords.y, coords.z)
                             distance = #(playerCoords - pedPosition)
@@ -108,10 +111,14 @@ RegisterNetEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition', functio
                             end
 
                             while distance <= (Config.DespawnDistance or 15) do
-                                Citizen.Wait(100)
+                                -- Check if ped is exists
+                                if not DoesEntityExist(playerPed) then
+                                    return
+                                end
                                 coords = Framework.Functions.GetCoords(playerPed)
                                 playerCoords = vector3(coords.x, coords.y, coords.z)
                                 distance = #(playerCoords - pedPosition)
+                                Citizen.Wait(100)
                             end
 
                             for i = 1, #PlayersInArea do
@@ -153,6 +160,9 @@ RegisterNetEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition', functio
 
                     Citizen.CreateThread(function()
                         while not hasPositionChanged do
+                            if not xPlayer or xPlayer == nil then
+                                return
+                            end
                             playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y, xPlayer.getCoords().z)
                             distance = #(playerCoords - pedPosition)
 
@@ -166,6 +176,9 @@ RegisterNetEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition', functio
                             end
 
                             while distance <= (Config.DespawnDistance or 15) do
+                                if not xPlayer or xPlayer == nil then
+                                    return
+                                end
                                 Citizen.Wait(100)
                                 playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y,
                                     xPlayer.getCoords().z)

@@ -227,6 +227,13 @@ RegisterNetEvent('hyzen_blanchisseur:client:HandleBlanchisseurTransaction', func
             -- TODO
             local playerAccount = nil
 
+            if not Framework or Framework == nil then
+                while not Framework do
+                    Framework = exports['es_extended']:getSharedObject()
+                    Citizen.Wait(1)
+                end
+            end
+
             for _, account in pairs(Framework.PlayerData.accounts) do
                 if account.name == Config.Money.BlackMoneyName then
                     playerAccount = account
@@ -272,17 +279,30 @@ RegisterNetEvent('hyzen_blanchisseur:client:HandleBlanchisseurTransaction', func
     end
 end)
 
-AddEventHandler('playerSpawned', function()
-    if Config.SpawnAtAllPositions and not Config.IsNpcRotating then
-        TriggerEvent('hyzen_blanchisseur:client:GenerateBlanchisseurs')
-    else
-        TriggerServerEvent('hyzen_blanchisseur:server:SyncBlanchisseur')
-    end
-end)
+if Config.Framework == 'qbcore' then
+    RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+        if Config.SpawnAtAllPositions and not Config.IsNpcRotating then
+            LoadFramework()
+            TriggerEvent('hyzen_blanchisseur:client:GenerateBlanchisseurs')
+        else
+            LoadFramework()
+            TriggerServerEvent('hyzen_blanchisseur:server:SyncBlanchisseur')
+        end
+    end)
+elseif Config.Framework == 'esx' then
+    RegisterNetEvent('esx:playerLoaded', function()
+        if Config.SpawnAtAllPositions and not Config.IsNpcRotating then
+            TriggerEvent('hyzen_blanchisseur:client:GenerateBlanchisseurs')
+        else
+            TriggerServerEvent('hyzen_blanchisseur:server:SyncBlanchisseur')
+        end
+    end)
+end
 
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
         Citizen.CreateThread(function()
+            LoadFramework()
             while not Framework do
                 Citizen.Wait(100)
             end
