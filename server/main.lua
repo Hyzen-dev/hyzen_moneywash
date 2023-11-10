@@ -80,103 +80,120 @@ RegisterNetEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition', functio
             end
             playersToCheck = number
 
-            for _, player in pairs(Players) do
-                local source = Framework.Functions.GetSource(player.PlayerData.license)
-                local playerPed = GetPlayerPed(source)
-                local coords = Framework.Functions.GetCoords(playerPed)
-                local playerCoords = vector3(coords.x, coords.y, coords.z)
-                local pedPosition = vector3(position.position.x, position.position.y, position.position.z)
+            if playersToCheck > 0 then
+                for _, player in pairs(Players) do
+                    local source = Framework.Functions.GetSource(player.PlayerData.license)
+                    local playerPed = GetPlayerPed(source)
+                    local coords = Framework.Functions.GetCoords(playerPed)
+                    local playerCoords = vector3(coords.x, coords.y, coords.z)
+                    local pedPosition = vector3(position.position.x, position.position.y, position.position.z)
 
-                local distance = #(playerCoords - pedPosition)
+                    local distance = #(playerCoords - pedPosition)
 
-                local checked = false
+                    local checked = false
 
-                Citizen.CreateThread(function()
-                    while not hasPositionChanged do
-                        coords = Framework.Functions.GetCoords(playerPed)
-                        playerCoords = vector3(coords.x, coords.y, coords.z)
-                        distance = #(playerCoords - pedPosition)
-
-                        if distance <= (Config.DespawnDistance or 15) then
-                            if Config.Debug then
-                                print(Locale['infos']['player_in_area']:format(GetPlayerName(source)))
-                            end
-                            if not PlayersInArea[source] then
-                                table.insert(PlayersInArea, source)
-                            end
-                        end
-
-                        while distance <= (Config.DespawnDistance or 15) do
-                            Citizen.Wait(100)
+                    Citizen.CreateThread(function()
+                        while not hasPositionChanged do
                             coords = Framework.Functions.GetCoords(playerPed)
                             playerCoords = vector3(coords.x, coords.y, coords.z)
                             distance = #(playerCoords - pedPosition)
-                        end
 
-                        for i = 1, #PlayersInArea do
-                            if PlayersInArea[i] == source then
-                                table.remove(PlayersInArea, i)
+                            if distance <= (Config.DespawnDistance or 15) then
+                                if Config.Debug then
+                                    print(Locale['infos']['player_in_area']:format(GetPlayerName(source)))
+                                end
+                                if not PlayersInArea[source] then
+                                    table.insert(PlayersInArea, source)
+                                end
                             end
-                        end
 
-                        if not checked then
-                            checked = true
-                            checkedPlayer = checkedPlayer + 1
-                        end
+                            while distance <= (Config.DespawnDistance or 15) do
+                                Citizen.Wait(100)
+                                coords = Framework.Functions.GetCoords(playerPed)
+                                playerCoords = vector3(coords.x, coords.y, coords.z)
+                                distance = #(playerCoords - pedPosition)
+                            end
 
-                        Citizen.Wait(100)
-                    end
-                    return
-                end)
+                            for i = 1, #PlayersInArea do
+                                if PlayersInArea[i] == source then
+                                    table.remove(PlayersInArea, i)
+                                end
+                            end
+
+                            if not checked then
+                                checked = true
+                                checkedPlayer = checkedPlayer + 1
+                            end
+
+                            Citizen.Wait(100)
+                        end
+                        return
+                    end)
+                end
+            else
+                if Config.Debug then
+                    print(Locale['infos']['npc_position_changed'])
+                end
+                TriggerEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition')
+                return
             end
         elseif Config.Framework == 'esx' then
             local Players = Framework.GetExtendedPlayers()
             playersToCheck = #Players
 
-            for _, xPlayer in pairs(Players) do
-                local source = xPlayer.getName()
-                local playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y, xPlayer.getCoords().z)
-                local pedPosition = vector3(position.position.x, position.position.y, position.position.z)
+            if playersToCheck > 0 then
+                for _, xPlayer in pairs(Players) do
+                    local source = xPlayer.getName()
+                    local playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y, xPlayer.getCoords().z)
+                    local pedPosition = vector3(position.position.x, position.position.y, position.position.z)
 
-                local distance = #(playerCoords - pedPosition)
+                    local distance = #(playerCoords - pedPosition)
 
-                local checked = false
+                    local checked = false
 
-                Citizen.CreateThread(function()
-                    while not hasPositionChanged do
-                        playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y, xPlayer.getCoords().z)
-                        distance = #(playerCoords - pedPosition)
-
-                        if distance <= (Config.DespawnDistance or 15) then
-                            if Config.Debug then 
-                                print(Locale['infos']['player_in_area']:format(GetPlayerName(source)))
-                            end
-                            if not PlayersInArea[source] then
-                                table.insert(PlayersInArea, source)
-                            end
-                        end
-
-                        while distance <= (Config.DespawnDistance or 15) do
-                            Citizen.Wait(100)
+                    Citizen.CreateThread(function()
+                        while not hasPositionChanged do
                             playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y, xPlayer.getCoords().z)
                             distance = #(playerCoords - pedPosition)
-                        end
 
-                        for i = 1, #PlayersInArea do
-                            if PlayersInArea[i] == source then
-                                table.remove(PlayersInArea, i)
+                            if distance <= (Config.DespawnDistance or 15) then
+                                if Config.Debug then
+                                    print(Locale['infos']['player_in_area']:format(GetPlayerName(source)))
+                                end
+                                if not PlayersInArea[source] then
+                                    table.insert(PlayersInArea, source)
+                                end
                             end
-                        end
 
-                        if not checked then
-                            checked = true
-                            checkedPlayer = checkedPlayer + 1
-                        end
+                            while distance <= (Config.DespawnDistance or 15) do
+                                Citizen.Wait(100)
+                                playerCoords = vector3(xPlayer.getCoords().x, xPlayer.getCoords().y,
+                                    xPlayer.getCoords().z)
+                                distance = #(playerCoords - pedPosition)
+                            end
 
-                        Citizen.Wait(100)
-                    end
-                    return
-                end)
+                            for i = 1, #PlayersInArea do
+                                if PlayersInArea[i] == source then
+                                    table.remove(PlayersInArea, i)
+                                end
+                            end
+
+                            if not checked then
+                                checked = true
+                                checkedPlayer = checkedPlayer + 1
+                            end
+
+                            Citizen.Wait(100)
+                        end
+                        return
+                    end)
+                end
+            else
+                if Config.Debug then
+                    print(Locale['infos']['npc_position_changed'])
+                end
+                TriggerEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition')
+                return
             end
         end
 
@@ -184,9 +201,9 @@ RegisterNetEvent('hyzen_blanchisseur:server:ChangeBlanchisseurPosition', functio
             while checkedPlayer ~= playersToCheck or #PlayersInArea > 0 do
                 Citizen.Wait(1000)
             end
-            
+
             hasPositionChanged = true
-            
+
             if Config.Debug then
                 print(Locale['infos']['npc_position_changed'])
             end
@@ -233,7 +250,8 @@ RegisterNetEvent('hyzen_blanchisseur:server:HandleBlanchisseurTransaction', func
             end
 
             if Config.Debug then
-                print(Locale['infos']['transaction_informations']:format(GetPlayerName(source), amount, Config.Money.BlackMoneyName))
+                print(Locale['infos']['transaction_informations']:format(GetPlayerName(source), amount,
+                    Config.Money.BlackMoneyName))
             end
         elseif Config.Money.BlackMoneyType == 'item' then
             local hasItem = xPlayer.Functions.GetItemByName(Config.Money.BlackMoneyName)
@@ -251,7 +269,8 @@ RegisterNetEvent('hyzen_blanchisseur:server:HandleBlanchisseurTransaction', func
             amount = hasItem.amount
 
             if Config.Debug then
-                print(Locale['infos']['transaction_informations']:format(GetPlayerName(source), amount, Config.Money.BlackMoneyName))
+                print(Locale['infos']['transaction_informations']:format(GetPlayerName(source), amount,
+                    Config.Money.BlackMoneyName))
             end
         end
 
@@ -272,12 +291,14 @@ RegisterNetEvent('hyzen_blanchisseur:server:HandleBlanchisseurTransaction', func
             end
 
             if Config.Debug then
-                print(Locale['infos']['transaction_success']:format(GetPlayerName(source), amountToGive, Config.Money.CashName))
+                print(Locale['infos']['transaction_success']:format(GetPlayerName(source), amountToGive,
+                    Config.Money.CashName))
             end
             xPlayer.Functions.Notify(Locale['texts']['transaction_success']:format(amount, amountToGive), 'success')
         else
             if Config.Debug then
-                print(Locale['infos']['transaction_success']:format(GetPlayerName(source), amountToGive, Config.Money.CashName))
+                print(Locale['infos']['transaction_success']:format(GetPlayerName(source), amountToGive,
+                    Config.Money.CashName))
             end
             xPlayer.Functions.Notify(Locale['texts']['transaction_error_not_enough_black_money'], 'error')
         end
@@ -328,7 +349,8 @@ RegisterNetEvent('hyzen_blanchisseur:server:HandleBlanchisseurTransaction', func
             end
 
             if Config.Debug then
-                print(Locale['infos']['transaction_informations']:format(GetPlayerName(source), amount, Config.Money.BlackMoneyName))
+                print(Locale['infos']['transaction_informations']:format(GetPlayerName(source), amount,
+                    Config.Money.BlackMoneyName))
             end
 
         elseif Config.Money.BlackMoneyType == 'item' then
@@ -352,10 +374,12 @@ RegisterNetEvent('hyzen_blanchisseur:server:HandleBlanchisseurTransaction', func
             end
 
             if Config.Debug then
-                print(Locale['infos']['transaction_success']:format(GetPlayerName(source), amountToGive, Config.Money.CashName))
+                print(Locale['infos']['transaction_success']:format(GetPlayerName(source), amountToGive,
+                    Config.Money.CashName))
             end
 
-            xPlayer.showNotification(Locale['texts']['transaction_success']:format(amount, amountToGive), 'success', 3000)
+            xPlayer.showNotification(Locale['texts']['transaction_success']:format(amount, amountToGive), 'success',
+                3000)
         else
             if Config.Debug then
                 print(Locale['infos']['transaction_failed_for']:format(GetPlayerName(source)))

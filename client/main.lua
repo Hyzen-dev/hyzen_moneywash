@@ -12,14 +12,6 @@ if Config.UseTarget then
     end
 end
 
-RegisterCommand('syncBlanchisseur', function(source, args, rawCommand)
-    if Config.SpawnAtAllPositions and not Config.IsNpcRotating then
-        TriggerEvent('hyzen_blanchisseur:client:GenerateBlanchisseurs')
-    else
-        TriggerServerEvent('hyzen_blanchisseur:server:SyncBlanchisseur')
-    end
-end, false)
-
 -- Loops
 if not Config.UseTarget then
     Citizen.CreateThread(function()
