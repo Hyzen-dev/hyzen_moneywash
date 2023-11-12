@@ -92,7 +92,7 @@ RegisterNetEvent('hyzen_blanchisseur:client:GenerateBlanchisseurs', function()
     for _, position in pairs(Config.Positions) do
         local randomModel = Config.NpcsModels[math.random(1, #Config.NpcsModels)]
 
-        ped = GenerateNpc(position.position, randomModel)
+        local ped = GenerateNpc(position.position, randomModel)
 
         if not ped then
             return
@@ -101,8 +101,108 @@ RegisterNetEvent('hyzen_blanchisseur:client:GenerateBlanchisseurs', function()
         table.insert(peds, ped)
 
         if position.showBlip then
-            local blip = GenerateBlip(ped)
+            local blip = GenerateBlip(newPed)
             table.insert(blips, blip)
+        end
+
+        if Config.UseTarget then
+            if Config.Framework == 'qbcore' then
+                exports['qb-target']:AddTargetEntity(newPed, {
+                    options = {{
+                        event = 'hyzen_blanchisseur:client:HandleBlanchisseurTransaction',
+                        icon = 'fas fa-money-bill-wave',
+                        label = Locale['texts']['wash_money_action']
+                    }},
+                    distance = 1.5
+                })
+            elseif Config.Framework == 'esx' then
+                if NetworkGetEntityIsNetworked(ped) then
+                    local netId = NetworkGetNetworkIdFromEntity(ped)
+                    exports.ox_target:addEntity(netId, {
+                        event = 'hyzen_blanchisseur:client:HandleBlanchisseurTransaction',
+                        label = Locale['texts']['wash_money_action'],
+                        name = "hyzen_blanchisseur:WashMoney",
+                        icon = "fas fa-money-bill-wave",
+                        distance = 1.5,
+                        canInteract = function()
+                            return not isTransactionActive
+                        end
+                    })
+                else
+                    exports.ox_target:addLocalEntity(ped, {
+                        event = 'hyzen_blanchisseur:client:HandleBlanchisseurTransaction',
+                        label = Locale['texts']['wash_money_action'],
+                        name = "hyzen_blanchisseur:WashMoney",
+                        icon = "fas fa-money-bill-wave",
+                        distance = 1.5,
+                        canInteract = function()
+                            return not isTransactionActive
+                        end
+                    })
+                end
+            end
+        else
+
+            Citizen.CreateThread(function()
+                while DoesEntityExist(ped) do
+                    local sleep = 1000
+                    if not ped or ped == nil then
+                        Citizen.Wait(sleep)
+                    end
+
+                    local pedCoords = GetEntityCoords(ped)
+                    local playerCoords = GetEntityCoords(PlayerPedId())
+                    local distance = GetDistanceBetweenCoords(pedCoords, playerCoords, true)
+
+                    if distance <= 1.5 then
+                        if Config.NpcTextType == '3d' then
+                            sleep = 0
+                            if not isTransactionActive then
+                                Draw3DText(pedCoords.x, pedCoords.y, pedCoords.z + 0.5,
+                                    Locale['texts']['wash_money_action_3d'])
+                            else
+                                Draw3DText(pedCoords.x, pedCoords.y, pedCoords.z + 0.5,
+                                    Locale['texts']['is_washing_money'])
+                            end
+                        else
+                            if Config.Framework == 'qbcore' then
+                                sleep = 0
+                                if not isTransactionActive then
+                                    exports['qb-core']:DrawText(Locale['texts']['wash_money_action_2d'])
+                                    isTextShowed = true
+                                else
+                                    exports['qb-core']:HideText()
+                                end
+                            elseif Config.Framework == 'esx' then
+                                sleep = 1
+                                if not isTransactionActive then
+                                    Framework.TextUI(Locale['texts']['wash_money_action_2d'])
+                                    isTextShowed = true
+                                else
+                                    Framework.HideUI()
+                                end
+                            end
+                        end
+                        if IsControlJustPressed(0, 38) then
+                            TriggerEvent('hyzen_blanchisseur:client:HandleBlanchisseurTransaction')
+                        end
+                    else
+                        if Config.Framework == 'qbcore' then
+                            if isTextShowed then
+                                exports['qb-core']:HideText()
+                                isTextShowed = false
+                            end
+                        elseif Config.Framework == 'esx' then
+                            if isTextShowed then
+                                Framework.HideUI()
+                                isTextShowed = false
+                            end
+                        end
+                    end
+                    Citizen.Wait(sleep)
+                end
+                return
+            end)
         end
     end
 end)

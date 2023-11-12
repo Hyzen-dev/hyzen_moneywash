@@ -4,7 +4,7 @@ Config = {}
 
 Config.Lang = 'en' -- 'fr' or 'en'
 Config.Framework = 'qbcore' -- 'qbcore' or 'esx'
-Config.UseTarget = GetConvar('UseTarget', 'false') == 'true' -- If you don't have Convar in server.cfg, add it
+Config.UseTarget = false -- GetConvar('UseTarget', 'false') == 'true' -- If you don't have Convar in server.cfg, add it
 
 Config.NpcsModels = { -- https://wiki.rage.mp/index.php?title=Peds
     "a_m_m_bevhills_01",
@@ -31,14 +31,14 @@ Config.NpcTextType = '3d' -- '3d' or '2d' (useless if Config.UseTarget is true)
 Config.DespawnIfPlayerAround = false -- if true, will despawn the npc if a player is around
 Config.DespawnDistance = 15 -- in meters
 
-Config.TransactionDuration = 5 -- in seconds
+Config.TransactionDuration = 15 -- in seconds
 
-Config.IsNpcRotating = true -- if true, the npc will be rotating between the positions
+Config.IsNpcRotating = false -- if true, the npc will be rotating between the positions
 Config.NpcRotatingTime = 10 -- in seconds
 
 Config.Debug = true -- if true, will print some debug messages
 
-Config.SpawnAtAllPositions = false -- if true, will spawn the npc at all positions (need to set Config.IsNpcRotating to false)
+Config.SpawnAtAllPositions = true -- if true, will spawn the npc at all positions (need to set Config.IsNpcRotating to false)
 
 Config.Positions = {
     {
